@@ -1,0 +1,86 @@
+project_name: persiancal
+
+before:
+  hooks:
+    - go mod tidy
+    - go mod download
+
+builds:
+  - id: persiancal
+    main: ./cmd/persiancal
+    binary: persiancal
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+      - freebsd
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    goarm:
+      - "7"
+    ignore:
+      - goos: windows
+        goarch: arm64
+      - goos: windows
+        goarch: arm
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+archives:
+  - id: persiancal
+    format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - LICENSE
+      - README.md
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - '^ci:'
+
+release:
+  github:
+    owner: CHashtager
+    name: persiancal
+  draft: false
+  prerelease: auto
+  name_template: "{{.ProjectName}} {{.Version}}"
+
+brews:
+  - name: persiancal
+    homepage: https://github.com/CHashtager/persiancal
+    description: "Persian (Jalali) Calendar CLI tool and Go library"
+    license: MIT
+    repository:
+      owner: CHashtager
+      name: homebrew-tap
+    commit_author:
+      name: goreleaserbot
+      email: bot@goreleaser.com
+    folder: Formula
+    install: |
+      bin.install "persiancal"
+    test: |
+      system "#{bin}/persiancal", "--help"
+
