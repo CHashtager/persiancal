@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/CHashtager/persiancal/pkg/persiancal"
 	"github.com/spf13/cobra"
@@ -37,7 +38,8 @@ func init() {
 func runNow(cmd *cobra.Command, args []string) {
 	usePersian, _ := cmd.Flags().GetBool("persian")
 
-	j := persiancal.Now()
+	now := time.Now()
+	j := persiancal.FromGregorianDate(now)
 	var output string
 
 	if nowFormat != "" {
@@ -63,15 +65,14 @@ func runNow(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	// TODO: Add time if requested
-	// if nowShowTime {
-	// 	t := j.ToGregorian()
-	// 	timeStr := t.Format("15:04:05")
-	// 	if usePersian {
-	// 		timeStr = persiancal.ToPersianDigits(timeStr)
-	// 	}
-	// 	output += " " + timeStr
-	// }
+	// Add time if requested
+	if nowShowTime {
+		timeStr := now.Format("15:04:05")
+		if usePersian {
+			timeStr = persiancal.ToPersianDigits(timeStr)
+		}
+		output += " " + timeStr
+	}
 
 	fmt.Println(output)
 }
